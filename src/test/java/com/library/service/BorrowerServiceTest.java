@@ -3,6 +3,8 @@ package com.library.service;
 import com.library.domain.Borrower;
 import com.library.dto.BorrowerRequest;
 import com.library.dto.BorrowerResponse;
+import com.library.exception.ErrorCode;
+import com.library.exception.LibraryServiceException;
 import com.library.repository.BorrowerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,11 +68,11 @@ class BorrowerServiceTest {
     void createBorrower_WhenEmailAlreadyExists_ShouldThrowException() {
         when(borrowerRepository.findByEmail(borrowerRequest.getEmail())).thenReturn(Optional.of(sampleBorrower));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        LibraryServiceException exception = assertThrows(LibraryServiceException.class, () -> {
             borrowerService.createBorrower(borrowerRequest);
         });
 
-        assertEquals("Borrower with email already exists: " + borrowerRequest.getEmail(), exception.getMessage());
+        assertEquals(ErrorCode.EMAIL_ALREADY_REGISTERED, exception.getErrorCode());
         verify(borrowerRepository, times(1)).findByEmail(borrowerRequest.getEmail());
         verify(borrowerRepository, never()).save(any(Borrower.class));
     }
@@ -108,11 +110,11 @@ class BorrowerServiceTest {
         UUID borrowerId = UUID.randomUUID();
         when(borrowerRepository.findById(borrowerId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        LibraryServiceException exception = assertThrows(LibraryServiceException.class, () -> {
             borrowerService.getBorrowerById(borrowerId);
         });
 
-        assertEquals("Borrower not found with id: " + borrowerId, exception.getMessage());
+        assertEquals(ErrorCode.BORROWER_NOT_FOUND, exception.getErrorCode());
         verify(borrowerRepository, times(1)).findById(borrowerId);
     }
 }
