@@ -3,6 +3,7 @@ package com.library.controller;
 import com.library.dto.ApiResponse;
 import com.library.dto.BorrowRequest;
 import com.library.dto.BorrowingResponse;
+import com.library.dto.ReturnRequest;
 import com.library.service.BorrowingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,15 +40,15 @@ public class BorrowingController {
         return new ResponseEntity<>(ApiResponse.success(response, "Book borrowed successfully"), HttpStatus.CREATED);
     }
 
-    @PostMapping("/return/{borrowingId}")
+    @PostMapping("/return")
     @Operation(summary = "Return a book", description = "Mark a borrowing record as returned")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Book returned successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Book already returned"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Borrowing record not found")
     })
-    public ResponseEntity<ApiResponse<BorrowingResponse>> returnBook(@PathVariable UUID borrowingId) {
-        BorrowingResponse response = borrowingService.returnBook(borrowingId);
+    public ResponseEntity<ApiResponse<BorrowingResponse>> returnBook(@Valid @RequestBody ReturnRequest request) {
+        BorrowingResponse response = borrowingService.returnBook(UUID.fromString(request.getBorrowingId()));
         return ResponseEntity.ok(ApiResponse.success(response, "Book returned successfully"));
     }
 
