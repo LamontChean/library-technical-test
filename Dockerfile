@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Run stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jr
 WORKDIR /app
 
 RUN addgroup -S spring && adduser -S spring -G spring
