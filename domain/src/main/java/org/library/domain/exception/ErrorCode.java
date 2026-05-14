@@ -22,6 +22,7 @@ public enum ErrorCode {
     BOOK_ALREADY_EXISTS("LIB-BOOK-002", "Book already exists"),
     INVALID_ISBN("LIB-BOOK-003", "Invalid ISBN format"),
     BOOK_NOT_AVAILABLE("LIB-BOOK-004", "Book is not available for borrowing"),
+    ISBN_CONFLICT("LIB-BOOK-005", "ISBN %s already exists with title '%s' by %s"),
     
     // ==================== Borrower Errors (LIB-BORROWER-XXX) ====================
     BORROWER_NOT_FOUND("LIB-BORROWER-001", "Borrower not found"),

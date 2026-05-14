@@ -1,45 +1,67 @@
 package org.library.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Book represents a physical copy of a book in the library.
+ * Multiple books can share the same catalog (ISBN, title, author).
+ */
 @Entity
 @Table(name = "books")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @NotBlank(message = "ISBN is required")
-    @Pattern(regexp = "^(97(8|9))?\\d{9}(\\d|X)$", message = "ISBN should be valid (10 or 13 digits)")
-    @Column(nullable = false)
-    private String isbn;
-
-    @NotBlank(message = "Title is required")
-    @Size(max = 200, message = "Title must be less than 200 characters")
-    @Column(nullable = false)
-    private String title;
-
-    @NotBlank(message = "Author is required")
-    @Size(max = 100, message = "Author must be less than 100 characters")
-    @Column(nullable = false)
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "catalog_id", nullable = false)
+    private BookCatalog catalog;
 
     @Column(nullable = false)
     private boolean available = true;
 
-    public Book(String isbn, String title, String author) {
-        this.isbn = isbn;
-        this.title = title;
-        this.author = author;
+    // Convenience methods to access catalog data
+    public String getIsbn() {
+        return catalog != null ? catalog.getIsbn() : null;
+    }
+
+    public String getTitle() {
+        return catalog != null ? catalog.getTitle() : null;
+    }
+
+    public String getAuthor() {
+        return catalog != null ? catalog.getAuthor() : null;
+    }
+
+    public void setIsbn(String isbn) {
+        if (catalog != null) {
+            catalog.setIsbn(isbn);
+        }
+    }
+
+    public void setTitle(String title) {
+        if (catalog != null) {
+            catalog.setTitle(title);
+        }
+    }
+
+    public void setAuthor(String author) {
+        if (catalog != null) {
+            catalog.setAuthor(author);
+        }
+    }
+
+    public Book(BookCatalog catalog) {
+        this.catalog = catalog;
+        this.available = true;
     }
 }
