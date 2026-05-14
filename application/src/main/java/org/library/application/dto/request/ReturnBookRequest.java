@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReturnBookRequest {
     
-    @NotBlank(message = "Book ID is required")
-    private String bookId;
+    @NotBlank(message = "Borrowing ID is required")
+    private String borrowingId;
 }

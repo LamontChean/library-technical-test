@@ -32,19 +32,18 @@ public class ReturnBookProcess extends AbstractProcessTemplate<ReturnBookRequest
     protected void preCheck(ReturnBookContext context) {
         ReturnBookRequest request = context.getRequestData();
         
-        // Validate book exists
-        Book book = bookRepository.findById(request.getBookId())
+        // Find borrowing record by ID
+        BorrowingRecord activeRecord = borrowingRecordRepository.findById(request.getBorrowingId())
                 .orElseThrow(() -> new LibraryServiceException(
-                        ErrorCode.BOOK_NOT_FOUND, request.getBookId()));
+                        ErrorCode.BORROWING_RECORD_NOT_FOUND, request.getBorrowingId()));
         
-        // Validate book is currently borrowed
-        if (book.isAvailable()) {
-            throw new LibraryServiceException(ErrorCode.NO_ACTIVE_BORROWING);
+        // Validate book is not already returned
+        if (activeRecord.isReturned()) {
+            throw new LibraryServiceException(ErrorCode.BOOK_ALREADY_RETURNED);
         }
         
-        // Find active borrowing record
-        BorrowingRecord activeRecord = borrowingRecordRepository.findActiveBorrowingByBookId(request.getBookId())
-                .orElseThrow(() -> new LibraryServiceException(ErrorCode.NO_ACTIVE_BORROWING));
+        // Get the book
+        Book book = activeRecord.getBook();
         
         // Store in typed context fields
         context.setBook(book);
