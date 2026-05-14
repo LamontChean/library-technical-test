@@ -1,5 +1,6 @@
 package com.library.exception;
 
+import com.library.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,65 +11,75 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for standardized error responses.
+ * All exceptions are caught here and converted to ApiResponse format.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
+    
+    /**
+     * Handle library service exceptions (404 or 400 based on error code)
+     */
+    @ExceptionHandler(LibraryServiceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLibraryService(LibraryServiceException ex) {
+        HttpStatus status = determineHttpStatus(ex.getErrorCode());
+        
+        ApiResponse<Void> response = ApiResponse.error(
+                ex.getErrorCode().getCode(),
                 ex.getMessage()
         );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        
+        return ResponseEntity.status(status).body(response);
     }
-
-    @ExceptionHandler(BusinessRuleException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessRuleException(BusinessRuleException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
-                HttpStatus.CONFLICT.getReasonPhrase(),
-                ex.getMessage(),
-                ex.getErrorCode()
-        );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    
+    /**
+     * Determine HTTP status based on error code
+     * *001 codes = NOT_FOUND, all others = BAD_REQUEST
+     */
+    private HttpStatus determineHttpStatus(ErrorCode errorCode) {
+        String code = errorCode.getCode();
+        if (code.endsWith("001")) {
+            // NOT_FOUND errors
+            return HttpStatus.NOT_FOUND;
+        }
+        // All other errors are BAD_REQUEST
+        return HttpStatus.BAD_REQUEST;
     }
-
+    
+    /**
+     * Handle validation errors (400)
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
+        
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            fieldErrors.put(fieldName, errorMessage);
         });
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Validation failed",
-                errors
+        
+        ApiResponse<Map<String, String>> response = ApiResponse.error(
+                ErrorCode.VALIDATION_FAILED.getCode(),
+                "Validation failed"
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        response.setData(fieldErrors);
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
+    
+    /**
+     * Handle all other exceptions (500)
+     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "An unexpected error occurred"
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+        ApiResponse<Void> response = ApiResponse.error(
+                ErrorCode.UNKNOWN_ERROR.getCode(),
+                "An unexpected error occurred. Please try again later."
         );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

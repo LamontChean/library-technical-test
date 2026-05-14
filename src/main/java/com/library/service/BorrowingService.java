@@ -5,8 +5,8 @@ import com.library.domain.Borrower;
 import com.library.domain.Borrowing;
 import com.library.dto.BorrowRequest;
 import com.library.dto.BorrowingResponse;
-import com.library.exception.BusinessRuleException;
-import com.library.exception.ResourceNotFoundException;
+import com.library.exception.ErrorCode;
+import com.library.exception.LibraryServiceException;
 import com.library.repository.BookRepository;
 import com.library.repository.BorrowerRepository;
 import com.library.repository.BorrowingRepository;
@@ -33,16 +33,13 @@ public class BorrowingService {
 
     public BorrowingResponse borrowBook(BorrowRequest request) {
         Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new ResourceNotFoundException("Book", "id", request.getBookId()));
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BOOK_NOT_FOUND, request.getBookId()));
         
         Borrower borrower = borrowerRepository.findById(request.getBorrowerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Borrower", "id", request.getBorrowerId()));
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BORROWER_NOT_FOUND, request.getBorrowerId()));
 
         if (!book.isAvailable()) {
-            throw new BusinessRuleException(
-                    "Book is not available for borrowing",
-                    "BOOK_NOT_AVAILABLE"
-            );
+            throw new LibraryServiceException(ErrorCode.BOOK_NOT_AVAILABLE);
         }
 
         book.setAvailable(false);
@@ -58,13 +55,10 @@ public class BorrowingService {
 
     public BorrowingResponse returnBook(UUID borrowingId) {
         Borrowing borrowing = borrowingRepository.findById(borrowingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Borrowing", "id", borrowingId));
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BORROWING_RECORD_NOT_FOUND, borrowingId));
 
         if (!borrowing.isActive()) {
-            throw new BusinessRuleException(
-                    "Book has already been returned",
-                    "BOOK_ALREADY_RETURNED"
-            );
+            throw new LibraryServiceException(ErrorCode.BOOK_ALREADY_RETURNED);
         }
 
         borrowing.returnBook();

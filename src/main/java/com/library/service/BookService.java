@@ -3,7 +3,8 @@ package com.library.service;
 import com.library.domain.Book;
 import com.library.dto.BookRequest;
 import com.library.dto.BookResponse;
-import com.library.exception.ResourceNotFoundException;
+import com.library.exception.ErrorCode;
+import com.library.exception.LibraryServiceException;
 import com.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +43,9 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public BookResponse getBookById(UUID id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
-        return toResponse(book);
+        return bookRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BOOK_NOT_FOUND, id));
     }
 
     private BookResponse toResponse(Book book) {

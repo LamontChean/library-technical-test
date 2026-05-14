@@ -1,5 +1,6 @@
 package com.library.controller;
 
+import com.library.dto.ApiResponse;
 import com.library.dto.BookRequest;
 import com.library.dto.BookResponse;
 import com.library.service.BookService;
@@ -23,20 +24,20 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<BookResponse> createBook(@Valid @RequestBody BookRequest request) {
+    public ResponseEntity<ApiResponse<BookResponse>> createBook(@Valid @RequestBody BookRequest request) {
         BookResponse response = bookService.createBook(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success(response, "Book registered successfully"), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<BookResponse>> getAllBooks() {
+    public ResponseEntity<ApiResponse<List<BookResponse>>> getAllBooks() {
         List<BookResponse> books = bookService.getAllBooks();
-        return ResponseEntity.ok(books);
+        return ResponseEntity.ok(ApiResponse.success(books));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookResponse> getBookById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BookResponse>> getBookById(@PathVariable UUID id) {
         BookResponse book = bookService.getBookById(id);
-        return ResponseEntity.ok(book);
+        return ResponseEntity.ok(ApiResponse.success(book));
     }
 }

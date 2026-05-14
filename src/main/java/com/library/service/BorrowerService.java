@@ -3,8 +3,8 @@ package com.library.service;
 import com.library.domain.Borrower;
 import com.library.dto.BorrowerRequest;
 import com.library.dto.BorrowerResponse;
-import com.library.exception.BusinessRuleException;
-import com.library.exception.ResourceNotFoundException;
+import com.library.exception.ErrorCode;
+import com.library.exception.LibraryServiceException;
 import com.library.repository.BorrowerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +25,7 @@ public class BorrowerService {
 
     public BorrowerResponse createBorrower(BorrowerRequest request) {
         if (borrowerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessRuleException(
-                    "Borrower with email already exists: " + request.getEmail(),
-                    "BORROWER_EMAIL_ALREADY_EXISTS"
-            );
+            throw new LibraryServiceException(ErrorCode.EMAIL_ALREADY_REGISTERED, request.getEmail());
         }
 
         Borrower borrower = new Borrower();
@@ -48,9 +45,9 @@ public class BorrowerService {
 
     @Transactional(readOnly = true)
     public BorrowerResponse getBorrowerById(UUID id) {
-        Borrower borrower = borrowerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Borrower", "id", id));
-        return toResponse(borrower);
+        return borrowerRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BORROWER_NOT_FOUND, id));
     }
 
     private BorrowerResponse toResponse(Borrower borrower) {

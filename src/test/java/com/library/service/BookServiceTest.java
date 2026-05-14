@@ -3,6 +3,8 @@ package com.library.service;
 import com.library.domain.Book;
 import com.library.dto.BookRequest;
 import com.library.dto.BookResponse;
+import com.library.exception.ErrorCode;
+import com.library.exception.LibraryServiceException;
 import com.library.repository.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,11 +102,11 @@ class BookServiceTest {
         UUID bookId = UUID.randomUUID();
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        LibraryServiceException exception = assertThrows(LibraryServiceException.class, () -> {
             bookService.getBookById(bookId);
         });
 
-        assertEquals("Book not found with id: " + bookId, exception.getMessage());
+        assertEquals(ErrorCode.BOOK_NOT_FOUND, exception.getErrorCode());
         verify(bookRepository, times(1)).findById(bookId);
     }
 }
