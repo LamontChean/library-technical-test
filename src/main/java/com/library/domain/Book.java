@@ -1,11 +1,14 @@
 package com.library.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Represents a physical copy of a book.
+ * Multiple copies can reference the same BookCatalog entry.
+ */
 @Entity
 @Table(name = "books")
 public class Book {
@@ -14,17 +17,9 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank(message = "ISBN is required")
-    @Column(nullable = false)
-    private String isbn;
-
-    @NotBlank(message = "Title is required")
-    @Column(nullable = false)
-    private String title;
-
-    @NotBlank(message = "Author is required")
-    @Column(nullable = false)
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "catalog_id", nullable = false)
+    private BookCatalog catalog;
 
     @Column(nullable = false)
     private boolean available = true;
@@ -41,14 +36,12 @@ public class Book {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
     
-    public String getIsbn() { return isbn; }
-    public void setIsbn(String isbn) { this.isbn = isbn; }
+    public BookCatalog getCatalog() { return catalog; }
+    public void setCatalog(BookCatalog catalog) { this.catalog = catalog; }
     
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
+    public String getIsbn() { return catalog != null ? catalog.getIsbn() : null; }
+    public String getTitle() { return catalog != null ? catalog.getTitle() : null; }
+    public String getAuthor() { return catalog != null ? catalog.getAuthor() : null; }
     
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }

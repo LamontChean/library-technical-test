@@ -20,18 +20,25 @@ import java.util.UUID;
 public class BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
+    private final BookService bookService;
+    private final BorrowerService borrowerService;
     private final BookRepository bookRepository;
     private final BorrowerRepository borrowerRepository;
 
     public BorrowingService(BorrowingRepository borrowingRepository, 
+                           BookService bookService,
+                           BorrowerService borrowerService,
                            BookRepository bookRepository,
                            BorrowerRepository borrowerRepository) {
         this.borrowingRepository = borrowingRepository;
+        this.bookService = bookService;
+        this.borrowerService = borrowerService;
         this.bookRepository = bookRepository;
         this.borrowerRepository = borrowerRepository;
     }
 
     public BorrowingResponse borrowBook(BorrowRequest request) {
+        // Find any available copy of the book by ISBN
         Book book = bookRepository.findById(request.getBookId())
                 .orElseThrow(() -> new LibraryServiceException(ErrorCode.BOOK_NOT_FOUND, request.getBookId()));
         
