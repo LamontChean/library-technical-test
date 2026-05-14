@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "borrowing_records")
+@Table(name = "borrowings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,17 +28,23 @@ public class BorrowingRecord {
     @JoinColumn(name = "borrower_id", nullable = false)
     private Borrower borrower;
 
-    @Column(nullable = false)
-    private LocalDateTime borrowDate;
+    @Column(name = "borrowed_at", nullable = false)
+    private LocalDateTime borrowedAt;
 
-    private LocalDateTime returnDate;
+    @Column(name = "returned_at")
+    private LocalDateTime returnedAt;
 
-    @Column(nullable = false)
-    private boolean returned = false;
+    @PrePersist
+    protected void onCreate() {
+        borrowedAt = LocalDateTime.now();
+    }
 
-    public BorrowingRecord(Book book, Borrower borrower) {
-        this.book = book;
-        this.borrower = borrower;
-        this.borrowDate = LocalDateTime.now();
+    public void returnBook() {
+        this.returnedAt = LocalDateTime.now();
+        this.book.setAvailable(true);
+    }
+
+    public boolean isActive() {
+        return returnedAt == null;
     }
 }

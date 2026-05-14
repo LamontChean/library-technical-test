@@ -38,7 +38,7 @@ public class ReturnBookProcess extends AbstractProcessTemplate<ReturnBookRequest
                         ErrorCode.BORROWING_RECORD_NOT_FOUND, request.getBorrowingId()));
         
         // Validate book is not already returned
-        if (activeRecord.isReturned()) {
+        if (!activeRecord.isActive()) {
             throw new LibraryServiceException(ErrorCode.BOOK_ALREADY_RETURNED);
         }
         
@@ -60,18 +60,13 @@ public class ReturnBookProcess extends AbstractProcessTemplate<ReturnBookRequest
         
         // Calculate borrowing duration
         long borrowingDays = java.time.Duration.between(
-                activeRecord.getBorrowDate(), 
+                activeRecord.getBorrowedAt(), 
                 java.time.LocalDateTime.now()
         ).toDays();
         
-        // Mark as returned
-        activeRecord.setReturned(true);
-        activeRecord.setReturnDate(java.time.LocalDateTime.now());
+        // Return the book (sets returnedAt and marks book as available)
+        activeRecord.returnBook();
         borrowingRecordRepository.save(activeRecord);
-        
-        // Mark book as available
-        book.setAvailable(true);
-        bookRepository.save(book);
         
         log.info("Book returned successfully - BookId: {}, Duration: {} days", 
                 book.getId(), borrowingDays);

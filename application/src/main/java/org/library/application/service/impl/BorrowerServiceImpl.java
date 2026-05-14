@@ -27,6 +27,12 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public java.util.List<Borrower> getAllBorrowers() {
+        return borrowerRepository.findAll();
+    }
+
+    @Override
     @Transactional
     public Borrower registerBorrower(BorrowerRequest request) {
         validateEmailUnique(request.getEmail());

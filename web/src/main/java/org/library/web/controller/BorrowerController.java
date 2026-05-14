@@ -26,6 +26,12 @@ public class BorrowerController {
                 .body(ApiResponse.success(borrower, "Borrower registered successfully"));
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<java.util.List<Borrower>>> getAllBorrowers() {
+        java.util.List<Borrower> borrowers = borrowerService.getAllBorrowers();
+        return ResponseEntity.ok(ApiResponse.success(borrowers));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Borrower>> getBorrower(@PathVariable String id) {
         Borrower borrower = borrowerService.getBorrowerById(id);

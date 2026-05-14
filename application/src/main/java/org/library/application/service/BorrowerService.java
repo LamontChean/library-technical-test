@@ -10,6 +10,11 @@ import org.library.domain.model.Borrower;
 public interface BorrowerService {
     
     /**
+     * Get all borrowers
+     */
+    java.util.List<Borrower> getAllBorrowers();
+    
+    /**
      * Get borrower by ID
      */
     Borrower getBorrowerById(String id);

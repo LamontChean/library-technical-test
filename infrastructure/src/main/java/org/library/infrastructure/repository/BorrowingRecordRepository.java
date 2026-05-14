@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface BorrowingRecordRepository extends JpaRepository<BorrowingRecord, String> {
     
-    @Query("SELECT br FROM BorrowingRecord br WHERE br.book.id = :bookId AND br.returned = false")
+    @Query("SELECT br FROM BorrowingRecord br WHERE br.book.id = :bookId AND br.returnedAt IS NULL")
     Optional<BorrowingRecord> findActiveBorrowingByBookId(@Param("bookId") String bookId);
 }

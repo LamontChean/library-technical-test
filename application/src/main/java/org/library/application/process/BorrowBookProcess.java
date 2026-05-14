@@ -71,7 +71,9 @@ public class BorrowBookProcess extends AbstractProcessTemplate<BorrowBookRequest
         bookRepository.save(book);
         
         // Create borrowing record
-        BorrowingRecord borrowingRecord = new BorrowingRecord(book, borrower);
+        BorrowingRecord borrowingRecord = new BorrowingRecord();
+        borrowingRecord.setBook(book);
+        borrowingRecord.setBorrower(borrower);
         borrowingRecord = borrowingRecordRepository.save(borrowingRecord);
         
         log.info("Book borrowed successfully - BorrowingRecordId: {}", borrowingRecord.getId());
