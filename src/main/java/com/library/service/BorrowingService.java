@@ -13,7 +13,9 @@ import com.library.repository.BorrowingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -71,6 +73,20 @@ public class BorrowingService {
         borrowing.returnBook();
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
         return toResponse(savedBorrowing);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getAllBorrowings() {
+        return borrowingRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public BorrowingResponse getBorrowingById(UUID borrowingId) {
+        Borrowing borrowing = borrowingRepository.findById(borrowingId)
+                .orElseThrow(() -> new LibraryServiceException(ErrorCode.BORROWING_RECORD_NOT_FOUND, borrowingId));
+        return toResponse(borrowing);
     }
 
     private BorrowingResponse toResponse(Borrowing borrowing) {

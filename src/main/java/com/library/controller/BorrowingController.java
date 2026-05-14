@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,5 +49,24 @@ public class BorrowingController {
     public ResponseEntity<ApiResponse<BorrowingResponse>> returnBook(@PathVariable UUID borrowingId) {
         BorrowingResponse response = borrowingService.returnBook(borrowingId);
         return ResponseEntity.ok(ApiResponse.success(response, "Book returned successfully"));
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all borrowings", description = "Retrieve a list of all borrowing records")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved borrowing list")
+    public ResponseEntity<ApiResponse<List<BorrowingResponse>>> getAllBorrowings() {
+        List<BorrowingResponse> borrowings = borrowingService.getAllBorrowings();
+        return ResponseEntity.ok(ApiResponse.success(borrowings));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get borrowing by ID", description = "Retrieve a specific borrowing record by its ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Borrowing record found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Borrowing record not found")
+    })
+    public ResponseEntity<ApiResponse<BorrowingResponse>> getBorrowingById(@PathVariable UUID id) {
+        BorrowingResponse borrowing = borrowingService.getBorrowingById(id);
+        return ResponseEntity.ok(ApiResponse.success(borrowing));
     }
 }
