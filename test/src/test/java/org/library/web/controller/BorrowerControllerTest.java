@@ -95,4 +95,24 @@ class BorrowerControllerTest {
 
         verify(borrowerService, times(1)).getBorrowerById("non-existent");
     }
+
+    @Test
+    void testGetAllBorrowers() throws Exception {
+        Borrower borrower1 = new Borrower("John Doe", "john@example.com");
+        borrower1.setId("borrower-1");
+        Borrower borrower2 = new Borrower("Jane Smith", "jane@example.com");
+        borrower2.setId("borrower-2");
+        java.util.List<Borrower> borrowers = java.util.Arrays.asList(borrower1, borrower2);
+
+        when(borrowerService.getAllBorrowers()).thenReturn(borrowers);
+
+        mockMvc.perform(get("/api/borrowers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].id").value("borrower-1"))
+                .andExpect(jsonPath("$.data[1].id").value("borrower-2"));
+
+        verify(borrowerService, times(1)).getAllBorrowers();
+    }
 }

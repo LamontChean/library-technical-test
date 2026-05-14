@@ -6,6 +6,7 @@ import org.library.application.service.BookService;
 import org.library.domain.exception.ErrorCode;
 import org.library.domain.exception.LibraryServiceException;
 import org.library.domain.model.Book;
+import org.library.domain.model.BookCatalog;
 import org.library.test.config.TestApplication;
 import org.library.web.response.ApiResponse;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,8 @@ class BookControllerTest {
     @Test
     void testRegisterBook_Success() throws Exception {
         BookRequest request = new BookRequest("9783161484100", "Clean Code", "Robert C. Martin");
-        Book book = new Book("9783161484100", "Clean Code", "Robert C. Martin");
+        BookCatalog catalog = new BookCatalog("9783161484100", "Clean Code", "Robert C. Martin");
+        Book book = new Book(catalog);
         book.setId("book-123");
 
         when(bookService.registerBook(any(BookRequest.class))).thenReturn(book);
@@ -72,9 +74,11 @@ class BookControllerTest {
 
     @Test
     void testGetAllBooks() throws Exception {
-        Book book1 = new Book("978-3-16-148410-0", "Book 1", "Author 1");
+        BookCatalog catalog1 = new BookCatalog("978-3-16-148410-0", "Book 1", "Author 1");
+        Book book1 = new Book(catalog1);
         book1.setId("book-1");
-        Book book2 = new Book("978-3-16-148410-1", "Book 2", "Author 2");
+        BookCatalog catalog2 = new BookCatalog("978-3-16-148410-1", "Book 2", "Author 2");
+        Book book2 = new Book(catalog2);
         book2.setId("book-2");
         List<Book> books = Arrays.asList(book1, book2);
 
@@ -92,7 +96,8 @@ class BookControllerTest {
 
     @Test
     void testGetBookById_Success() throws Exception {
-        Book book = new Book("978-3-16-148410-0", "Clean Code", "Robert C. Martin");
+        BookCatalog catalog = new BookCatalog("978-3-16-148410-0", "Clean Code", "Robert C. Martin");
+        Book book = new Book(catalog);
         book.setId("book-123");
 
         when(bookService.getBookById("book-123")).thenReturn(book);

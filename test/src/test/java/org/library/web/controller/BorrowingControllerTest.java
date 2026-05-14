@@ -7,6 +7,7 @@ import org.library.application.service.BorrowingService;
 import org.library.domain.exception.ErrorCode;
 import org.library.domain.exception.LibraryServiceException;
 import org.library.domain.model.Book;
+import org.library.domain.model.BookCatalog;
 import org.library.domain.model.Borrower;
 import org.library.domain.model.BorrowingRecord;
 import org.library.test.config.TestApplication;
@@ -47,15 +48,19 @@ class BorrowingControllerTest {
 
     @BeforeEach
     void setUp() {
-        book = new Book("978-3-16-148410-0", "Clean Code", "Robert C. Martin");
+        BookCatalog catalog = new BookCatalog("978-3-16-148410-0", "Clean Code", "Robert C. Martin");
+        book = new Book(catalog);
         book.setId("book-123");
         book.setAvailable(true);
 
         borrower = new Borrower("John Doe", "john.doe@example.com");
         borrower.setId("borrower-123");
 
-        borrowingRecord = new BorrowingRecord(book, borrower);
+        borrowingRecord = new BorrowingRecord();
         borrowingRecord.setId("record-123");
+        borrowingRecord.setBook(book);
+        borrowingRecord.setBorrower(borrower);
+        borrowingRecord.setBorrowedAt(LocalDateTime.now());
     }
 
     @Test
@@ -70,7 +75,7 @@ class BorrowingControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value("record-123"))
-                .andExpect(jsonPath("$.data.returned").value(false))
+                .andExpect(jsonPath("$.data.borrowedAt").isNotEmpty())
                 .andExpect(jsonPath("$.message").value("Book borrowed successfully"));
 
         verify(borrowingService, times(1)).borrowBook(any(BorrowBookRequest.class));
@@ -108,8 +113,7 @@ class BorrowingControllerTest {
     @Test
     void testReturnBook_Success() throws Exception {
         ReturnBookRequest request = new ReturnBookRequest("book-123");
-        borrowingRecord.setReturned(true);
-        borrowingRecord.setReturnDate(LocalDateTime.now());
+        borrowingRecord.setReturnedAt(java.time.LocalDateTime.now());
 
         when(borrowingService.returnBook(any(ReturnBookRequest.class))).thenReturn(borrowingRecord);
 
@@ -119,7 +123,7 @@ class BorrowingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value("record-123"))
-                .andExpect(jsonPath("$.data.returned").value(true))
+                .andExpect(jsonPath("$.data.returnedAt").isNotEmpty())
                 .andExpect(jsonPath("$.message").value("Book returned successfully"));
 
         verify(borrowingService, times(1)).returnBook(any(ReturnBookRequest.class));
@@ -144,12 +148,15 @@ class BorrowingControllerTest {
 
     @Test
     void testGetAllBorrowingRecords() throws Exception {
-        BorrowingRecord record1 = new BorrowingRecord(book, borrower);
+        BorrowingRecord record1 = new BorrowingRecord();
         record1.setId("record-1");
-        BorrowingRecord record2 = new BorrowingRecord(book, borrower);
+        record1.setBook(book);
+        record1.setBorrower(borrower);
+        BorrowingRecord record2 = new BorrowingRecord();
         record2.setId("record-2");
-        record2.setReturned(true);
-        record2.setReturnDate(LocalDateTime.now());
+        record2.setBook(book);
+        record2.setBorrower(borrower);
+        record2.setReturnedAt(LocalDateTime.now());
         List<BorrowingRecord> records = Arrays.asList(record1, record2);
 
         when(borrowingService.getAllBorrowingRecords()).thenReturn(records);
