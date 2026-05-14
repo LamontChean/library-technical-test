@@ -35,16 +35,6 @@ public class BorrowingServiceImpl implements BorrowingService {
     private final ReturnBookProcess returnBookProcess;
     private final BorrowingRecordRepository borrowingRecordRepository;
 
-    public BorrowingServiceImpl(BookRepository bookRepository,
-                                BorrowerRepository borrowerRepository,
-                                BorrowingRecordRepository borrowingRecordRepository) {
-        this.borrowBookProcess = new BorrowBookProcess(
-                bookRepository, borrowerRepository, borrowingRecordRepository);
-        this.returnBookProcess = new ReturnBookProcess(
-                bookRepository, borrowingRecordRepository);
-        this.borrowingRecordRepository = borrowingRecordRepository;
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<BorrowingRecord> getAllBorrowingRecords() {

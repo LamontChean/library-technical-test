@@ -14,12 +14,14 @@ import org.library.domain.model.BorrowingRecord;
 import org.library.infrastructure.repository.BookRepository;
 import org.library.infrastructure.repository.BorrowerRepository;
 import org.library.infrastructure.repository.BorrowingRecordRepository;
+import org.springframework.stereotype.Component;
 
 /**
  * Process for borrowing a book.
  * Uses AbstractProcessTemplate for standardized workflow execution.
  */
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class BorrowBookProcess extends AbstractProcessTemplate<BorrowBookRequest, BorrowBookResult, BorrowBookContext> {
 

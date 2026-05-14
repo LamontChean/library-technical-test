@@ -12,6 +12,7 @@ import org.library.domain.model.Book;
 import org.library.domain.model.BorrowingRecord;
 import org.library.infrastructure.repository.BookRepository;
 import org.library.infrastructure.repository.BorrowingRecordRepository;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
  * Uses AbstractProcessTemplate for standardized workflow execution.
  */
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class ReturnBookProcess extends AbstractProcessTemplate<ReturnBookRequest, ReturnBookResult, ReturnBookContext> {
 
